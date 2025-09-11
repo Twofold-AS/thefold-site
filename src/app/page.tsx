@@ -1,39 +1,96 @@
 "use client";
-import { LiquidChrome, GrainOverlay, StaggeredMenu, Balatro } from "@/components";
-import { useEffect, useRef } from "react";
-import { Logo } from "@/assets";
 
-const menuItems = [
+import { useEffect, useRef, useState } from "react";
+import dynamic from 'next/dynamic';
+import { StaggeredMenu } from "@/components";
+import { Logo } from "../../public/assets";
+import type { Application } from '@splinetool/runtime';
+
+// Dynamically import SplineScene with no SSR
+const SplineScene = dynamic(
+  () => import('@/components/animations/SplineScene').then(mod => mod.SplineSceneNoSSR),
+  { 
+    ssr: false
+  }
+);
+
+// Constants
+const MENU_ITEMS = [
   { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
   { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
   { label: 'Services', ariaLabel: 'View our services', link: '/services' },
   { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
 ];
 
-const socialItems = [
+const SOCIAL_ITEMS = [
   { label: 'Twitter', link: 'https://twitter.com' },
   { label: 'GitHub', link: 'https://github.com' },
   { label: 'LinkedIn', link: 'https://linkedin.com' }
 ];
 
+// Your Spline scene URL
+const SPLINE_SCENE_URL = "https://prod.spline.design/g3eZIwebT0DBUFPT/scene.splinecode";
+
 export default function Home() {
+  const [splineApp, setSplineApp] = useState<Application | null>(null);
+  const [sceneReady, setSceneReady] = useState(false);
+  const titleRef = useRef<HTMLHeadingElement | null>(null);
+  const [showContent, setShowContent] = useState(false);
 
-  const ref = useRef<HTMLHeadingElement>(null);
+  // Handle Spline load
+  const handleSplineLoad = (app: Application) => {
+    console.log('✅ Spline scene loaded successfully');
+    setSplineApp(app);
+    setSceneReady(true);
+    
+    // Show content after scene loads
+    setTimeout(() => {
+      setShowContent(true);
+    }, 500);
+  };
 
+  // Handle Spline error
+  const handleSplineError = () => {
+    console.error('❌ Failed to load Spline scene');
+    // Show content anyway if Spline fails
+    setShowContent(true);
+  };
+
+  // Animate title when ready
   useEffect(() => {
-    if (ref.current) {
-      console.log("Font applied:", window.getComputedStyle(ref.current).fontFamily);
+    if (showContent && titleRef.current) {
+      titleRef.current.classList.add('opacity-100', 'translate-y-0');
+      titleRef.current.classList.remove('opacity-0', 'translate-y-8');
     }
-  }, []);
+  }, [showContent]);
 
   return (
-    <main className="relative min-h-screen">
-      <div className="sm-scope fixed inset-0 z-[9999] overflow-hidden">
-        <div className="relative w-full h-full">
+    <main className="relative w-screen h-screen overflow-hidden bg-black">
+      
+      {/* Spline 3D Background - Positioned first, lowest z-index */}
+      <div className="fixed inset-0 w-full h-full" style={{ zIndex: 1 }}>
+        <SplineScene
+          scene={SPLINE_SCENE_URL}
+        />
+      </div>
+
+      {/* Hero Content */}
+      <div 
+        className="fixed inset-0 flex items-center justify-center pointer-events-none"
+        style={{ zIndex: 10 }}
+      >
+      </div>
+
+      {/* Navigation - Highest z-index */}
+      <div 
+        className="fixed inset-0 pointer-events-none"
+        style={{ zIndex: 100 }}
+      >
+        <div className="relative w-full h-full pointer-events-auto">
           <StaggeredMenu
             position="right"
-            items={menuItems}
-            socialItems={socialItems}
+            items={MENU_ITEMS}
+            socialItems={SOCIAL_ITEMS}
             displaySocials={true}
             displayItemNumbering={false}
             menuButtonColor="#fff"
@@ -48,30 +105,12 @@ export default function Home() {
           />
         </div>
       </div>
-      <section className="relative h-screen w-full overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 z-0">
-{/*           <LiquidChrome
-            baseColor={[0.1, 0.1, 0.1]}
-            speed={0.1}
-            amplitude={0.6}
-            interactive={true}
-          /> */}
-          <Balatro
-  isRotate={false}
-  mouseInteraction={false}
-  pixelFilter={2000}
-  color1={"#0c505e"}
-/>
-        </div>
 
-        {/* Grain overlay (on top of Liquid, still behind content) */}
-        <GrainOverlay className="z-1" grainOpacity={0.1} grainChaos={0.1} />
-
-        {/* Foreground */}
-        <div className="relative z-1 flex items-center justify-center h-full">
-          <h1 ref={ref} className="text-4xl font-graffity text-white">TWOFOLD</h1>
-        </div></section>
+      {/* Debug Info - Remove in production */}
+      <div className="fixed bottom-4 left-4 text-white/50 text-xs" style={{ zIndex: 1000 }}>
+        <p>Scene: {sceneReady ? '✅ Loaded' : '⏳ Loading...'}</p>
+        <p>URL: {SPLINE_SCENE_URL.slice(0, 30)}...</p>
+      </div>
     </main>
   );
 }

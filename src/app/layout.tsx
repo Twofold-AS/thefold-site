@@ -13,38 +13,45 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Fix 1: Ensure correct path and add display swap
+// Custom fonts - moved to public folder
 const graffity = localFont({
-  src: '/public/assets/fonts/graffity-fc-svg.otf',
+  src: 'fonts/graffity-fc-svg.otf',
   variable: '--font-graffity',
   display: 'swap',
   weight: '400',
 });
 
 const graffityFill = localFont({
-  src: '/public/assets/fonts/graffity-fill.otf',
+  src: 'fonts/graffity-fill.otf',
   variable: '--font-graffity-fill',
   display: 'swap',
   weight: '400',
 });
 
 const test = localFont({
-  src: '/public/assets/fonts/test.otf',
+  src: 'fonts/test.otf',
   variable: '--font-test',
   display: 'swap',
   weight: '400',
 });
 
 const NeueMetanaNext = localFont({
-  src: '/public/assets/fonts/NeueMetanaNext-SemiBold.otf',
+  src: 'fonts/NeueMetanaNext-SemiBold.otf',
   variable: '--font-neuemetana',
   display: 'swap',
-  weight: '400',
+  weight: '600',
 });
 
 export const metadata: Metadata = {
-  title: "Thefold site",
-  description: "Interactive creative agency portfolio",
+  title: "TheFold - Creative Agency",
+  description: "Interactive creative agency portfolio with stunning 3D experiences",
+  keywords: "creative agency, web design, 3D, interactive, portfolio",
+  authors: [{ name: "TheFold Agency" }],
+  openGraph: {
+    title: "TheFold - Creative Agency",
+    description: "Interactive creative agency portfolio with stunning 3D experiences",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -53,7 +60,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${graffity.variable} ${graffityFill.variable} ${test.variable} ${NeueMetanaNext.variable} antialiased overflow-x-hidden`}
       >

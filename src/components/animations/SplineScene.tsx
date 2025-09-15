@@ -14,19 +14,13 @@ interface SplineSceneProps {
   onMouseHover?: (e: any) => void;
   onScroll?: (e: any) => void;
   showLoader?: boolean;
+  fallbackBackground?: React.ReactNode;
+  enableInteraction?: boolean;
 }
 
 function SplineLoader() {
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-black">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-purple-500/20 rounded-full animate-pulse" />
-          <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-purple-500 rounded-full animate-spin" />
-        </div>
-        <p className="text-white/40 text-sm font-light tracking-widest uppercase">Loading Scene</p>
-      </div>
-    </div>
+    <div className="absolute inset-0 bg-black" />
   );
 }
 
@@ -39,6 +33,8 @@ export default function SplineScene({
   onMouseHover,
   onScroll,
   showLoader = true,
+  fallbackBackground,
+  enableInteraction = true,
 }: SplineSceneProps) {
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,18 +73,22 @@ export default function SplineScene({
         width: '100%',
         height: '100%',
         backgroundColor: '#000000',
+        pointerEvents: enableInteraction ? 'auto' : 'none',
       }}
     >
-      {/* Only show loader initially, remove it completely once loaded */}
-      {isLoading && showLoader && <SplineLoader />}
+      {/* Fallback background when loading or if provided */}
+      {fallbackBackground && (isLoading || !enableInteraction) && fallbackBackground}
       
-      <Suspense fallback={showLoader ? <SplineLoader /> : null}>
+      {/* Only show loader initially, remove it completely once loaded */}
+      {isLoading && showLoader && !fallbackBackground && <SplineLoader />}
+      
+      <Suspense fallback={showLoader && !fallbackBackground ? <SplineLoader /> : null}>
         <Spline
           scene={scene}
           onLoad={handleLoad}
-          onMouseDown={onMouseDown}
-          onMouseUp={onMouseUp}
-          onScroll={onScroll}
+          onMouseDown={enableInteraction ? onMouseDown : undefined}
+          onMouseUp={enableInteraction ? onMouseUp : undefined}
+          onScroll={enableInteraction ? onScroll : undefined}
         />
       </Suspense>
     </div>

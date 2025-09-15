@@ -1,6 +1,5 @@
-import CardNav from "@/components/sections/navbar/CardNav";
-import Image from "next/image";
-import Logo from "../../public/assets/Logo";
+import CardNav from "@/components/navigation/CardNav";
+import Logo from "@/components/ui/Logo";
 
 export default function Navbar() {
   const items = [

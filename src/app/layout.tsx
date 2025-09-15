@@ -13,30 +13,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Custom fonts - moved to public folder
+// Custom fonts - using relative paths
 const graffity = localFont({
-  src: 'fonts/graffity-fc-svg.otf',
+  src: '../assets/fonts/graffity-fc-svg.otf',
   variable: '--font-graffity',
   display: 'swap',
   weight: '400',
 });
 
 const graffityFill = localFont({
-  src: 'fonts/graffity-fill.otf',
+  src: '../assets/fonts/graffity-fill.otf',
   variable: '--font-graffity-fill',
   display: 'swap',
   weight: '400',
 });
 
 const test = localFont({
-  src: 'fonts/test.otf',
+  src: '../assets/fonts/test.otf',
   variable: '--font-test',
   display: 'swap',
   weight: '400',
 });
 
 const NeueMetanaNext = localFont({
-  src: 'fonts/NeueMetanaNext-SemiBold.otf',
+  src: '../assets/fonts/NeueMetanaNext-SemiBold.otf',
   variable: '--font-neuemetana',
   display: 'swap',
   weight: '600',

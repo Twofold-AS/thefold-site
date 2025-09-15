@@ -1,18 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from 'next/dynamic';
 import { StaggeredMenu } from "@/components/navigation/StaggeredMenu";
 import Logo from "@/components/ui/Logo";
 import LoadingOverlay from "@/components/overlays/LoadingOverlay";
-import Silk from "@/components/animations/Silk";
-import { 
-  HeroSection, 
-  BentoGrid, 
-  ServicesSection, 
-  WorkSection, 
-  ContactSection 
-} from "@/components/sections";
 import type { Application } from '@splinetool/runtime';
 
 // Dynamically import SplineScene with no SSR
@@ -20,17 +12,24 @@ const SplineScene = dynamic(
   () => import('@/components/animations/SplineScene').then(mod => mod.SplineSceneNoSSR),
   { 
     ssr: false,
-    loading: () => <div className="fixed inset-0 bg-black" />
+    loading: () => <LoadingScreen />
   }
 );
 
+// Loading component
+function LoadingScreen() {
+  return (
+    <div className="fixed inset-0 bg-black" />
+  );
+}
+
 // Constants
 const MENU_ITEMS = [
-  { label: 'Home', ariaLabel: 'Go to home page', link: '#home' },
-  { label: 'About', ariaLabel: 'Learn about us', link: '#about' },
-  { label: 'Services', ariaLabel: 'View our services', link: '#services' },
-  { label: 'Work', ariaLabel: 'See our work', link: '#work' },
-  { label: 'Contact', ariaLabel: 'Get in touch', link: '#contact' }
+  { label: 'Home', ariaLabel: 'Go to home page', link: '/' },
+  { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
+  { label: 'Services', ariaLabel: 'View our services', link: '/services' },
+  { label: 'Work', ariaLabel: 'See our work', link: '/work' },
+  { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' }
 ];
 
 const SOCIAL_ITEMS = [
@@ -40,21 +39,33 @@ const SOCIAL_ITEMS = [
   { label: 'Behance', link: 'https://behance.net' }
 ];
 
-// Your Spline scene URL - can be used optionally in other sections
-const SPLINE_SCENE_URL = "https://prod.spline.design/XQw8Vu00CbSznJ6E/scene.splinecode";
+// Your Spline scene URL
+const SPLINE_SCENE_URL = "https://prod.spline.design/g3eZIwebT0DBUFPT/scene.splinecode";
 
 export default function Home() {
+  const [splineApp, setSplineApp] = useState<Application | null>(null);
+  const [sceneReady, setSceneReady] = useState(false);
+  const [showContent, setShowContent] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-  // Example: How to use Spline background in other sections
-  // const [splineApp, setSplineApp] = useState<Application | null>(null);
-  // const [sceneReady, setSceneReady] = useState(false);
-  // const handleSplineLoad = (app: Application) => {
-  //   console.log('✅ Spline scene loaded successfully');
-  //   setSplineApp(app);
-  //   setSceneReady(true);
-  // };
+  // Handle Spline load
+  const handleSplineLoad = (app: Application) => {
+    console.log('✅ Spline scene loaded successfully');
+    setSplineApp(app);
+    setSceneReady(true);
+    
+    // Show content after scene loads
+    setTimeout(() => {
+      setShowContent(true);
+    }, 500);
+  };
 
+  // Handle Spline error
+  const handleSplineError = () => {
+    console.error('❌ Failed to load Spline scene');
+    // Show content anyway if Spline fails
+    setShowContent(true);
+  };
 
   // Handle loading overlay completion
   const handleLoadingComplete = () => {
@@ -62,35 +73,30 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-screen min-h-screen overflow-hidden">
+    <main className="relative w-screen h-screen overflow-hidden bg-black">
       
       {/* First Load Overlay */}
       {isFirstLoad && (
         <LoadingOverlay onComplete={handleLoadingComplete} duration={2500} />
       )}
+      
+      {/* Spline 3D Background */}
+      <div className="fixed inset-0 w-full h-full z-0">
+        <SplineScene
+          scene={SPLINE_SCENE_URL}
+          onLoad={handleSplineLoad}
+          showLoader={false}
+        />
+      </div>
 
-      {/* Hero Section with Waves Background */}
-      <section id="home" className="relative">
-        <div className="absolute inset-0 w-full h-full z-0 bg-black">
-          <Silk
-  speed={5}
-  scale={1}
-  color="#7B7481"
-  noiseIntensity={1.5}
-  rotation={0}
-/>
-        </div>
-        <div className="relative z-10">
-          <HeroSection />
-        </div>
-      </section>
-
-            {/* Hero Section with Waves Background */}
-      <section id="bento" className="relative">
-        <div className="relative z-10">
-          <BentoGrid />
-        </div>
-      </section>
+      {/* Hero Content - Can add your main content here */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-10">
+        {showContent && (
+          <div className="text-center animate-fade-in-up">
+            {/* Add your hero content here if needed */}
+          </div>
+        )}
+      </div>
 
       {/* Navigation */}
       <div className="fixed inset-0 pointer-events-none z-50">
@@ -116,7 +122,7 @@ export default function Home() {
       {/* Debug Info - Remove in production */}
       {process.env.NODE_ENV === 'development' && (
         <div className="fixed bottom-4 left-4 text-white/50 text-xs z-[100]">
-          <p>Waves Background: ✅ Active</p>
+          <p>Scene: {sceneReady ? '✅ Loaded' : '⏳ Loading...'}</p>
         </div>
       )}
     </main>

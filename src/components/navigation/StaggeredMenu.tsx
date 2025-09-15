@@ -1,15 +1,18 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { TextRoll } from '@/components/ui/RollingText';
 
 export interface StaggeredMenuItem {
   label: string;
   ariaLabel: string;
   link: string;
 }
+
 export interface StaggeredMenuSocialItem {
   label: string;
   link: string;
 }
+
 export interface StaggeredMenuProps {
   position?: 'left' | 'right';
   colors?: string[];
@@ -71,6 +74,21 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
   const itemEntranceTweenRef = useRef<gsap.core.Tween | null>(null);
 
+  // ===== ROLLING TEXT MENU ITEMS SECTION =====
+  // Add your custom rolling text menu items here
+  // Each item will have a smooth rolling text hover effect
+  const rollingTextMenuItems = [
+    { label: 'Home', href: '#home', description: 'Return to homepage' },
+    { label: 'About', href: '#about', description: 'Learn about us' },
+    { label: 'Services', href: '#services', description: 'Our services' },
+    { label: 'Work', href: '#work', description: 'View our portfolio' },
+    { label: 'Contact', href: '#contact', description: 'Get in touch' },
+    // Add more items here as needed:
+    // { label: 'Blog', href: '/blog', description: 'Read our articles' },
+    // { label: 'Careers', href: '/careers', description: 'Join our team' },
+  ];
+  // ===== END ROLLING TEXT SECTION =====
+
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const panel = panelRef.current;
@@ -115,7 +133,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     }
     itemEntranceTweenRef.current?.kill();
 
-    const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel')) as HTMLElement[];
+    const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel, .rolling-text-item')) as HTMLElement[];
     const numberEls = Array.from(
       panel.querySelectorAll('.sm-panel-list[data-numbering] .sm-panel-item')
     ) as HTMLElement[];
@@ -226,7 +244,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       ease: 'power3.in',
       overwrite: 'auto',
       onComplete: () => {
-        const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel')) as HTMLElement[];
+        const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel, .rolling-text-item')) as HTMLElement[];
         if (itemEls.length) gsap.set(itemEls, { yPercent: 140, rotate: 10 });
 
         const numberEls = Array.from(
@@ -253,7 +271,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     spinTweenRef.current?.kill();
 
     if (opening) {
-      // ensure container never rotates
       gsap.set(icon, { rotate: 0, transformOrigin: '50% 50%' });
       spinTweenRef.current = gsap
         .timeline({ defaults: { ease: 'power4.out' } })
@@ -354,7 +371,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       >
         <div
           ref={preLayersRef}
-          className="sm-prelayers absolute top-0 right-0 bottom-0 pointer-events-none z-[5]"
+          className="sm-prelayers fixed inset-0 pointer-events-none z-[5]"
           aria-hidden="true"
         >
           {(() => {
@@ -367,7 +384,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
             return arr.map((c, i) => (
               <div
                 key={i}
-                className="sm-prelayer absolute top-0 right-0 h-full w-full translate-x-0"
+                className="sm-prelayer fixed inset-0 w-full h-full translate-x-0"
                 style={{ background: c }}
               />
             ));
@@ -375,17 +392,14 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         </div>
 
         <header
-          className="staggered-menu-header absolute top-0 left-0 w-full flex items-center justify-between p-[2em] bg-transparent pointer-events-none z-20"
+          className="staggered-menu-header fixed top-0 left-0 w-full flex items-center justify-between p-[2em] bg-transparent pointer-events-none z-20"
           aria-label="Main navigation header"
         >
           <div className="sm-logo flex items-center select-none pointer-events-auto" aria-label="Logo">
-
             {(() => {
-              // prefer the new `logo` prop; fall back to `logoUrl`
               const src = logo ?? logoUrl;
 
               if (typeof src === "string") {
-                // For Next.js: use a path served from /public, e.g. "/logo.svg"
                 return (
                   <img
                     src={src || "/logo.svg"}
@@ -397,7 +411,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
                   />
                 );
               }
-              // If it's a React element like <Logo />, render it
               return React.isValidElement(src) ? src : null;
             })()}
           </div>
@@ -445,18 +458,47 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         <aside
           id="staggered-menu-panel"
           ref={panelRef}
-          className="staggered-menu-panel absolute top-0 right-0 h-full bg-white flex flex-col p-[6em_2em_2em_2em] overflow-y-auto z-10 backdrop-blur-[12px]"
+          className="staggered-menu-panel fixed inset-0 bg-white flex flex-col p-[6em_2em_2em_2em] overflow-y-auto z-10 backdrop-blur-[12px]"
           style={{ WebkitBackdropFilter: 'blur(12px)' }}
           aria-hidden={!open}
         >
-          <div className="sm-panel-inner flex-1 flex flex-col gap-5">
-            <ul
-              className="sm-panel-list list-none m-0 p-0 flex flex-col gap-2"
-              role="list"
-              data-numbering={displayItemNumbering || undefined}
-            >
-              {items && items.length ? (
-                items.map((it, idx) => (
+          <div className="sm-panel-inner flex-1 flex flex-col gap-8 max-w-4xl mx-auto w-full">
+            
+            {/* Rolling Text Menu Items Section */}
+            <div className="rolling-text-menu-section">
+              <h2 className="text-lg font-medium text-gray-600 mb-6 uppercase tracking-wider">Navigation</h2>
+              <div className="grid gap-4">
+                {rollingTextMenuItems.map((item, idx) => (
+                  <div key={`rolling-${idx}`} className="rolling-text-item-wrapper relative overflow-hidden">
+                    <a
+                      href={item.href}
+                      className="rolling-text-item block relative py-4 border-b border-gray-200 hover:border-gray-400 transition-colors duration-300 group"
+                      aria-label={item.description}
+                    >
+                      <div className="flex items-center justify-between">
+                        <TextRoll 
+                          className="text-6xl font-bold uppercase tracking-tight text-black group-hover:text-gray-700 transition-colors duration-300"
+                        >
+                          {item.label}
+                        </TextRoll>
+                        <span className="text-sm text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          {item.description}
+                        </span>
+                      </div>
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Traditional Menu Items (if any) */}
+            {items && items.length > 0 && (
+              <ul
+                className="sm-panel-list list-none m-0 p-0 flex flex-col gap-2"
+                role="list"
+                data-numbering={displayItemNumbering || undefined}
+              >
+                {items.map((it, idx) => (
                   <li className="sm-panel-itemWrap relative overflow-hidden leading-none" key={it.label + idx}>
                     <a
                       className="sm-panel-item relative text-black font-semibold text-[4rem] cursor-pointer leading-none tracking-[-2px] uppercase transition-[background,color] duration-150 ease-linear inline-block no-underline pr-[1.4em]"
@@ -469,18 +511,11 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
                       </span>
                     </a>
                   </li>
-                ))
-              ) : (
-                <li className="sm-panel-itemWrap relative overflow-hidden leading-none" aria-hidden="true">
-                  <span className="sm-panel-item relative text-black font-semibold text-[4rem] cursor-pointer leading-none tracking-[-2px] uppercase transition-[background,color] duration-150 ease-linear inline-block no-underline pr-[1.4em]">
-                    <span className="sm-panel-itemLabel inline-block [transform-origin:50%_100%] will-change-transform">
-                      No items
-                    </span>
-                  </span>
-                </li>
-              )}
-            </ul>
+                ))}
+              </ul>
+            )}
 
+            {/* Social Links */}
             {displaySocials && socialItems && socialItems.length > 0 && (
               <div className="sm-socials mt-auto pt-8 flex flex-col gap-3" aria-label="Social links">
                 <h3 className="sm-socials-title m-0 text-base font-medium [color:var(--sm-accent,#ff0000)]">Socials</h3>
@@ -509,7 +544,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
       <style>{`
 .sm-scope .staggered-menu-wrapper { position: relative; width: 100%; height: 100%; z-index: 40; }
-.sm-scope .staggered-menu-header { position: absolute; top: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 2em; background: transparent; pointer-events: none; z-index: 20; }
+.sm-scope .staggered-menu-header { position: fixed; top: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 2em; background: transparent; pointer-events: none; z-index: 20; }
 .sm-scope .staggered-menu-header > * { pointer-events: auto; }
 .sm-scope .sm-logo { display: flex; align-items: center; user-select: none; }
 .sm-scope .sm-logo-img { display: block; height: 32px; width: auto; object-fit: contain; }
@@ -523,12 +558,12 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 .sm-scope .sm-panel-itemWrap { position: relative; overflow: hidden; line-height: 1; }
 .sm-scope .sm-icon-line { position: absolute; left: 50%; top: 50%; width: 100%; height: 2px; background: currentColor; border-radius: 2px; transform: translate(-50%, -50%); will-change: transform; }
 .sm-scope .sm-line { display: none !important; }
-.sm-scope .staggered-menu-panel { position: absolute; top: 0; right: 0; width: clamp(260px, 38vw, 420px); height: 100%; background: white; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; flex-direction: column; padding: 6em 2em 2em 2em; overflow-y: auto; z-index: 10; }
-.sm-scope [data-position='left'] .staggered-menu-panel { right: auto; left: 0; }
-.sm-scope .sm-prelayers { position: absolute; top: 0; right: 0; bottom: 0; width: clamp(260px, 38vw, 420px); pointer-events: none; z-index: 5; }
-.sm-scope [data-position='left'] .sm-prelayers { right: auto; left: 0; }
-.sm-scope .sm-prelayer { position: absolute; top: 0; right: 0; height: 100%; width: 100%; transform: translateX(0); }
-.sm-scope .sm-panel-inner { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; }
+.sm-scope .staggered-menu-panel { position: fixed; top: 0; right: 0; left: 0; bottom: 0; width: 100%; height: 100vh; background: white; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; flex-direction: column; padding: 6em 2em 2em 2em; overflow-y: auto; z-index: 10; }
+.sm-scope .sm-prelayers { position: fixed; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100vh; pointer-events: none; z-index: 5; }
+.sm-scope .sm-prelayer { position: fixed; top: 0; right: 0; left: 0; bottom: 0; height: 100vh; width: 100%; transform: translateX(0); }
+.sm-scope .sm-panel-inner { flex: 1; display: flex; flex-direction: column; gap: 2rem; }
+.sm-scope .rolling-text-menu-section { margin-bottom: 2rem; }
+.sm-scope .rolling-text-item-wrapper { position: relative; overflow: hidden; line-height: 1; }
 .sm-scope .sm-socials { margin-top: auto; padding-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .sm-scope .sm-socials-title { margin: 0; font-size: 1rem; font-weight: 500; color: var(--sm-accent, #ff0000); }
 .sm-scope .sm-socials-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: row; align-items: center; gap: 1rem; flex-wrap: wrap; }

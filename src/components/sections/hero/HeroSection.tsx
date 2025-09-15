@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { TextRoll, Skiper58 } from '@/components/ui/RollingText'
+import { TextRoll } from '@/components/ui/RollingText';
 
 interface HeroSectionProps {
   className?: string;
@@ -18,8 +18,11 @@ export default function HeroSection({ className = '' }: HeroSectionProps) {
 
   return (
     <section className={`relative w-full h-screen flex items-center justify-center ${className}`}>
-      <div className="text-center z-10 relative">
-        <Skiper58 />
+      {/* Ensure the text is properly positioned and has pointer events */}
+      <div className="text-center z-20 relative pointer-events-auto">
+        <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <TextRoll className="text-6xl font-bold">The next generation of booking</TextRoll>
+        </div>
       </div>
     </section>
   );
